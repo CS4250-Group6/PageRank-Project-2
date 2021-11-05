@@ -2,30 +2,26 @@
 import requests
 import time
 import csv
-import os
 from langdetect import detect
 from bs4 import BeautifulSoup
 
 
-def can_scrape(robots: str, url: str):
-    try:
-        open_page = get_page(robots)
-    except:
-        return False
+def can_scrape(url: str):
+    """fun(url: String) can_scrape -> Bool: parse robots.txt check if the website is allowed to scrape"""
 
-    if open_page is not None:
+    if robotsTxt is not None:
 
-        startAgentBlock = open_page.find("User-agent: *")
+        startAgentBlock = robotsTxt.find("User-agent: *")
         if startAgentBlock == -1:
             # If robots.txt exists and no wildcard user-agent exists, then we aren't allowed to crawl.
             return False
 
-        endAgentBlock = open_page.find("\n\n", startAgentBlock)
+        endAgentBlock = robotsTxt.find("\n\n", startAgentBlock)
         if endAgentBlock == -1:
             # If no \n\n (2 return characters) and startAgentBlock exists, then assume that the block ends at the end of the document.
-            endAgentBlock = len(open_page)
+            endAgentBlock = len(robotsTxt)
 
-        ourBlock = open_page[startAgentBlock:endAgentBlock]
+        ourBlock = robotsTxt[startAgentBlock:endAgentBlock]
         split_by_line = ourBlock.split("\n")
 
         for each_line in split_by_line:
@@ -36,29 +32,23 @@ def can_scrape(robots: str, url: str):
                 # Get everything after the base url.
                 firstSlashI = url.find("/")
                 pathPlusExtra = url[firstSlashI:]
-                # print("path:", pathPlusExtra)
+
                 if pre_colon[1].strip() in pathPlusExtra:
-                    # print(pre_colon[1].strip())
                     if pre_colon[0] == "Allow":
-                        print("EXPLICITLY ALLOWED")
                         return True
                     elif pre_colon[0] == "Disallow":
-                        print("DISALLOWED", pre_colon[1].strip(), url)
                         return False
     return True
 
 
-# The url will be a robots.txt url this time so you need to do nothing more than what's written
-
-# Use Andrew Daos get_page method with the url to get the page
-# if none return true, else...
-
-# Parse the robots.txt page and see if we can scrape it
-# return true or false
-
-
 def get_page(url):
-    site = requests.get("http://" + url)
+    """fun(url: String) get_page -> String: get page"""
+    try:
+        site = requests.get("http://" + url)
+    except:
+        print("BAD HTTP URL REQUEST:", url)
+        return None
+
     if site.status_code == 429:
         print("WARN: 429 Too Many Requests")
         time.sleep(3)
@@ -69,22 +59,15 @@ def get_page(url):
         return None
 
 
-def save_page(page, file_name):
-    # Saving and extracting into file, probably
-    langPath = os.path.join("repository", selectedLanguage)
-    fullPathName = os.path.join(langPath, file_name)
-    with open(fullPathName, "w") as f:
-        f.write(page)
-        f.close()
-
-
 def save_csv(url, links):
+    """fun(url: String, links: Int) -> Void: save these two values in a csv file"""
     with open(f"linksOut.csv", "a") as file:
         writer = csv.writer(file)
-        row = url, links
+        row = (url, links)
         writer.writerow(row)
 
-def save_link_csv(url, links: list[str]):
+
+def save_link_csv(url, links):
     with open(f"linksTo.csv", "a") as file:
         writer = csv.writer(file)
         r = (url, *links)
@@ -112,6 +95,7 @@ def get_base_url(url):
 
 
 def get_links(soup, baseUrl):
+    """fun(page: String) -> list(urls: String): parse page for links"""
     links = set()
 
     for link in soup.findAll("a", href=True, download=None):
@@ -119,9 +103,7 @@ def get_links(soup, baseUrl):
         if newUrl is not None:
             if newUrl[0:7] == "http://" or newUrl[0:8] == "https://":
                 links.add(replace_http_protocol(url))
-            elif (
-                newUrl.startswith("//")
-            ):
+            elif newUrl.startswith("//"):
                 links.add(newUrl[2:])
             elif (
                 not newUrl.startswith("#")
@@ -134,40 +116,44 @@ def get_links(soup, baseUrl):
                 else:
                     links.add(newUrl)
 
+    links = set(
+        filter(
+            lambda x: can_scrape(x)
+            and restrict_domain == x[0 : len(restrict_domain)]
+            and x != "en.wikipedia.orgjavascript:print();", #TODO remove for cpp crawling.
+            links,
+        )
+    )  # Filter out all links that we can't scrape or shouldn't be scraping.
     return links
 
 
 visited = set()
 crawl = ["en.wikipedia.org/wiki/Computer_science"]
+restrict_domain = "en.wikipedia.org"
 selectedLanguage = "en"
 searchCount = 1000
+
+try:
+    robotsTxt = get_page("en.wikipedia.org/robots.txt")
+except:
+    print("ERR, COULDN'T READ ROBOTS.TXT URL!")
+    exit(1)
 
 while len(crawl) != 0 and len(visited) < searchCount:
 
     url = crawl.pop(0)
     baseUrl = get_base_url(url)
 
-    # fun(url: String) can_scrape -> Bool: parse robots.txt check if the website is allowed to scrape (more details above)
-    # Tasked to: Shurbur
-    if url not in visited and can_scrape(baseUrl + "/robots.txt", url) == True:
+    if url not in visited and can_scrape(url) == True:
         print(f"Crawling ({len(visited)}/{searchCount}): {url}")
 
-        # fun(url: String) get_page -> String: get page
-        # Tasked to: Andrew Dao
         page = get_page(url)
         if page is not None:
 
             soup = BeautifulSoup(page, "html.parser")
             if detect(soup.get_text()) == selectedLanguage:
-                # fun(page: String, file_name: String) -> Void: save page
-                # Tasked to: Andrew Dao
-                # save_page(page, "page{}.html".format(len(visited) + 1))
-
-                # fun(page: String) -> list(urls: String): parse page for links
-                # Tasked to: Jonathan
                 links = get_links(soup, baseUrl)
 
-                # fun(url: String, links: Int) -> Void: save these two values in a csv file (more details above)
                 save_csv(url, len(links))
                 save_link_csv(url, links)
 
