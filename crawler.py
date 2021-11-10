@@ -2,43 +2,8 @@
 import requests
 import time
 import csv
-from langdetect import detect
 from bs4 import BeautifulSoup
-
-
-def can_scrape(url: str):
-    """fun(url: String) can_scrape -> Bool: parse robots.txt check if the website is allowed to scrape"""
-
-    if robotsTxt is not None:
-
-        startAgentBlock = robotsTxt.find("User-agent: *")
-        if startAgentBlock == -1:
-            # If robots.txt exists and no wildcard user-agent exists, then we aren't allowed to crawl.
-            return False
-
-        endAgentBlock = robotsTxt.find("\n\n", startAgentBlock)
-        if endAgentBlock == -1:
-            # If no \n\n (2 return characters) and startAgentBlock exists, then assume that the block ends at the end of the document.
-            endAgentBlock = len(robotsTxt)
-
-        ourBlock = robotsTxt[startAgentBlock:endAgentBlock]
-        split_by_line = ourBlock.split("\n")
-
-        for each_line in split_by_line:
-            if "#" not in each_line and ":" in each_line:
-                # If Disallow: /something/ in url after root, then disallow.
-                pre_colon = each_line.split(":")  # Allow or not.
-
-                # Get everything after the base url.
-                firstSlashI = url.find("/")
-                pathPlusExtra = url[firstSlashI:]
-
-                if pre_colon[1].strip() in pathPlusExtra:
-                    if pre_colon[0] == "Allow":
-                        return True
-                    elif pre_colon[0] == "Disallow":
-                        return False
-    return True
+import urllib.robotparser as robotparser
 
 
 def get_page(url):
@@ -118,8 +83,7 @@ def get_links(soup, baseUrl):
 
     links = set(
         filter(
-            lambda x: can_scrape(x)
-            and restrict_domain == x[0 : len(restrict_domain)]
+            lambda x: restrict_domain == x[0 : len(restrict_domain)]
             and x != "en.wikipedia.orgjavascript:print();", #TODO remove for cpp crawling.
             links,
         )
@@ -130,7 +94,6 @@ def get_links(soup, baseUrl):
 visited = set()
 crawl = ["en.wikipedia.org/wiki/Computer_science"]
 restrict_domain = "en.wikipedia.org"
-selectedLanguage = "en"
 searchCount = 1000
 
 try:
@@ -138,26 +101,29 @@ try:
 except:
     print("ERR, COULDN'T READ ROBOTS.TXT URL!")
     exit(1)
+    
+parser = robotparser.RobotFileParser()
+parser.set_url("http://www.wikipedia.org/robots.txt") # change for cpp crawling, needs to be this url for wikipedia
+parser.read()
 
 while len(crawl) != 0 and len(visited) < searchCount:
 
     url = crawl.pop(0)
     baseUrl = get_base_url(url)
 
-    if url not in visited and can_scrape(url) == True:
+    if url not in visited and parser.can_fetch("*", url):
         print(f"Crawling ({len(visited)}/{searchCount}): {url}")
 
         page = get_page(url)
         if page is not None:
 
             soup = BeautifulSoup(page, "html.parser")
-            if detect(soup.get_text()) == selectedLanguage:
-                links = get_links(soup, baseUrl)
+            links = get_links(soup, baseUrl)
 
-                save_csv(url, len(links))
-                save_link_csv(url, links)
+            save_csv(url, len(links))
+            save_link_csv(url, links)
 
-                crawl += list(links)
-                time.sleep(0.5)
+            crawl += list(links)
+            time.sleep(0.5)
 
-                visited.add(url)
+            visited.add(url)
