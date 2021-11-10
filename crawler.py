@@ -46,6 +46,8 @@ def replace_http_protocol(url):
         new_url = new_url[7:]
     elif url[0:8] == "https://":
         new_url = new_url[8:]
+    elif url.startswith("//"):
+	new_url = new_url[2:]
 
     return new_url
 
@@ -66,31 +68,23 @@ def get_links(soup, baseUrl):
     for link in soup.findAll("a", href=True, download=None):
         newUrl = link.get("href")
         if newUrl is not None:
-            if newUrl[0:7] == "http://" or newUrl[0:8] == "https://":
-                links.add(replace_http_protocol(url))
-            elif newUrl.startswith("//"):
-                links.add(newUrl[2:])
-            elif (
-                not newUrl.startswith("#")
-                and not newUrl.startswith("ftp://")
-                and not newUrl.startswith("mailto:")
-                and not newUrl == ""
-            ):
-                if newUrl.find(baseUrl) == -1:
-                    links.add(baseUrl + newUrl)
-                else:
-                    links.add(newUrl)
+		if x[-4:] != '.png' and x[-4:] != '.jpg' and x[-5:] != '.jpeg' and parser.can_fetch("*", newUrl) and newUrl != "en.wikipedia.orgjavascript:print();":
+		    if newUrl[0:7] == "http://" or newUrl[0:8] == "https://" or newUrl.startswith("//"):
+			no_protocol_url = replace_http_protocol(url)
+			if restrict_domain == no_protocol_url[0 : len(restrict_domain)]:
+				links.add(no_protocol_url)
+		    elif (
+			not newUrl.startswith("#")
+			and not newUrl.startswith("ftp://")
+			and not newUrl.startswith("mailto:")
+			and not newUrl == ""
+		    ):
+			if newUrl.find(baseUrl) == -1:
+			    links.add(baseUrl + newUrl)
+			elif restrict_domain == x[0 : len(restrict_domain)]:
+			    links.add(newUrl)
 
-    links = set(
-        filter(
-            lambda x: restrict_domain == x[0 : len(restrict_domain)]
-            and x != "en.wikipedia.orgjavascript:print();" #TODO remove for cpp crawling, #TODO remove for cpp crawling.
-            and x[-4:] != '.png'
-			and x[-4:] != '.jpg'
-			and x[-5:] != '.jpeg', # exclude jpg, png, jpeg, wikipedias weird :b
-            links,
-        )
-    )  # Filter out all links that we can't scrape or shouldn't be scraping.
+ 
     return links
 
 
