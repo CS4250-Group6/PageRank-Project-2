@@ -84,7 +84,10 @@ def get_links(soup, baseUrl):
     links = set(
         filter(
             lambda x: restrict_domain == x[0 : len(restrict_domain)]
-            and x != "en.wikipedia.orgjavascript:print();", #TODO remove for cpp crawling.
+            and x != "en.wikipedia.orgjavascript:print();" #TODO remove for cpp crawling, #TODO remove for cpp crawling.
+            and x[-4:] != '.png'
+			and x[-4:] != '.jpg'
+			and x[-5:] != '.jpeg', # exclude jpg, png, jpeg, wikipedias weird :b
             links,
         )
     )  # Filter out all links that we can't scrape or shouldn't be scraping.
