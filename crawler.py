@@ -68,7 +68,7 @@ def get_links(soup, baseUrl):
     for link in soup.findAll("a", href=True, download=None):
         newUrl = link.get("href")
         if newUrl is not None:
-		if x[-4:] != '.png' and x[-4:] != '.jpg' and x[-5:] != '.jpeg' and parser.can_fetch("*", newUrl) and newUrl != "en.wikipedia.orgjavascript:print();":
+		if newUrl[-4:] != '.png' and newUrl[-4:] != '.jpg' and newUrl[-5:] != '.jpeg' and parser.can_fetch("*", newUrl) and newUrl != "en.wikipedia.orgjavascript:print();":
 		    if newUrl[0:7] == "http://" or newUrl[0:8] == "https://" or newUrl.startswith("//"):
 			no_protocol_url = replace_http_protocol(url)
 			if restrict_domain == no_protocol_url[0 : len(restrict_domain)]:
