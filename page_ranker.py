@@ -6,10 +6,8 @@ import csv
 def random_surfer_rank():
     pass
 
-
-def teleporting_rank():
+def hits_rank():
     pass
-
 
 def default_rank():
     # incoming = generate_incoming_url_dict()
