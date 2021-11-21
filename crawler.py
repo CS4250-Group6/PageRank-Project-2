@@ -52,7 +52,7 @@ def replace_http_protocol(url):
     elif url[0:8] == "https://":
         new_url = new_url[8:]
     elif url.startswith("//"):
-	    new_url = new_url[2:]
+        new_url = new_url[2:]
 
     return new_url
 
@@ -65,13 +65,20 @@ def get_base_url(url):
         base_url = base_url[:url_end]
     return base_url
 
-def verify_not_restricted(url_to_check):
+def verify_not_restricted(url_to_check: str) -> bool:
     check = tldextract.extract(url_to_check)
     against = tldextract.extract(restrict_domain)
-    if '.'.join(check) == '.'.join(against):
+    if '.'.join(check) == '.'.join(against) and verify_wiki_mainspace(url_to_check):
         return True
     else:
         return False
+
+def verify_wiki_mainspace(check_url: str) -> bool:
+    if "wikipedia" in check_url:
+        spl = check_url.split("/")
+        if ":" in spl[-1]:
+            return False
+    return True
 
 
 def get_links(soup, baseUrl):
@@ -92,7 +99,7 @@ def get_links(soup, baseUrl):
                 and not newUrl.startswith("mailto:")
                 and not newUrl == ""
                 ):
-                    if newUrl.find(baseUrl) == -1 and parser.can_fetch("*", "http://" + baseUrl + newUrl):
+                    if newUrl.find(baseUrl) == -1 and verify_not_restricted(baseUrl + newUrl) and parser.can_fetch("*", "http://" + baseUrl + newUrl):
                         links.add(baseUrl + newUrl)
                     elif parser.can_fetch("*", "http://" + newUrl) and verify_not_restricted(newUrl):
                         links.add(newUrl)
@@ -110,7 +117,7 @@ args = p.parse_args(sys.argv[1:])
 
 crawl = [args.seed_url]
 restrict_domain = args.r
-searchCount = args.n
+searchCount = int(args.n)
 fileSuffix = args.o
 
 print(f"Running crawler with: n={args.n}, seed={args.seed_url}, restrict={args.r}, file_suffix={args.o}.")

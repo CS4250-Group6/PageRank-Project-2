@@ -36,7 +36,7 @@ def default_rank():
             if j in outlinks[i]:
                 M[jj][ii] = 1 / outlinks_sum[i]
 
-    loops = 100000
+    loops = 100
     for i in range(loops):
         page_rank = M @ page_rank
 
