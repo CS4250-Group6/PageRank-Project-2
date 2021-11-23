@@ -136,7 +136,6 @@ def default_rank():
     print(outStr)
     print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
 
-
 def generate_incoming_url_dict():
     res = {}
     with open(f"linksTo.csv", "r") as file:
@@ -150,7 +149,6 @@ def generate_incoming_url_dict():
 
     return res
 
-
 def generate_outgoing_url_dict():
     res = {}
     with open(f"linksTo.csv", "r") as file:
@@ -160,7 +158,6 @@ def generate_outgoing_url_dict():
 
     return res
 
-
 def generate_outlinks_sum_dict():
     res = {}
     with open(f"linksOut.csv", "r") as file:
@@ -169,7 +166,6 @@ def generate_outlinks_sum_dict():
             res[line[0]] = int(line[1])
 
     return res
-
 
 def default_rank_data_preprocessing():
     """

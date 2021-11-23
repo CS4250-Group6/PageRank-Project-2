@@ -67,10 +67,16 @@ def get_base_url(url):
 def verify_not_restricted(url_to_check: str) -> bool:
     check = tldextract.extract(url_to_check)
     against = tldextract.extract(restrict_domain)
-    if '.'.join(check) == '.'.join(against) and verify_wiki_mainspace(url_to_check):
-        return True
+    if restrict_domain == "www.cpp.edu":
+        if check.domain == against.domain and check.suffix == against.suffix and verify_wiki_mainspace(url_to_check):
+            return True
+        else:
+            return False
     else:
-        return False
+        if '.'.join(check) == '.'.join(against) and verify_wiki_mainspace(url_to_check):
+            return True
+        else:
+            return False
 
 def verify_wiki_mainspace(check_url: str) -> bool:
     if "wikipedia" in check_url:
