@@ -1,13 +1,53 @@
-# import matplotlib.pyplot as plt
+from random import randint
+import networkx as nx
+import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
+Node_link = np.array(
+[[1, 1, 0, 0, 0, 0],
+[0, 0, 0, 1, 0, 0],
+[0, 1, 0, 0, 0, 0],
+[0, 1, 0, 0, 1, 0],
+[0, 1, 0, 0, 0, 1],
+[0, 1, 0, 0, 0, 0]])
+
+n = Node_link.shape[0]
+degree = np.sum(Node_link, axis=1, keepdims=1)
+
+Node_link = Node_link + (degree == 0)
+degree = np.sum(Node_link, axis=1, keepdims=1)
+
+WORDS = 100000
+list = [[col for col in range(n) if Node_link[row, col]] for row in range(n)]
+count = [0]*n
+state = 0
+
+for _ in range(WORDS):
+    count[state] += 1
+    if randint(1, 6) == 6: 
+        state = randint(0, 5)
+else:
+    d = len(list[state])
+    state = list[state][randint(0, d - 1)]
+    print(list, [c / WORDS for c in count], sep="\n")
 
 def random_surfer_rank():
     pass
 
+
 def hits_rank():
-    pass
+    Node_link = nx.DiGraph()
+    Node_link.edges([('A', 'D'), ('B', 'C'), ('B', 'E'), ('C', 'A'),
+                  ('D', 'C'), ('E', 'D'), ('E', 'B'), ('E', 'F'),
+                  ('E', 'C'), ('F', 'C'), ('F', 'H'), ('G', 'A'),
+                  ('G', 'C'), ('H', 'A')])
+    plt.figure(figsize=(10, 10))
+    nx.draw_networkx(Node_link, with_labels=True)
+
+    hubs, authorities = nx.hits(Node_link, max_iter=50, normalized=True)
+    print("Hub Points", hubs)
+    print("Authority Points" , authorities)
 
 def default_rank():
     # incoming = generate_incoming_url_dict()
