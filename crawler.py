@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup
 import urllib.robotparser as robotparser
 import tldextract
 import argparse
-
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
 
 def get_page(url):
     """fun(url: String) get_page -> String: get page"""
@@ -63,7 +64,12 @@ def get_base_url(url):
     if url_end != -1:
         base_url = base_url[:url_end]
     return base_url
-
+def get_url_subdirectory(url):
+    subdi_url = replace_http_protocol(url)
+    url_end = subdi_url.find("/")
+    if url_end != -1:
+        subdi_url = subdi_url[url_end:]
+    return subdi_url
 def verify_not_restricted(url_to_check: str) -> bool:
     check = tldextract.extract(url_to_check)
     against = tldextract.extract(restrict_domain)
@@ -156,3 +162,13 @@ while len(crawl) != 0 and len(visited) < searchCount:
             time.sleep(0.5)
 
             visited.add(url)
+objects = ('Us', 'Google')
+y_pos = np.arange(len(objects))
+performance = [time_took, 2.3 ]
+
+plt.bar(y_pos, performance, align='center', alpha=0.5)
+plt.xticks(y_pos, objects)
+plt.ylabel('time in minutes')
+plt.title('Time to Crawl 1000 Pages')
+
+plt.show()
