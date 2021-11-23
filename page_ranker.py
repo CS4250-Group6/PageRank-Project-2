@@ -15,7 +15,7 @@ def random_surfer_rank():
     print("Number of links with outlinks:", n)
     # floating point precision means that data will be lost.
     page_rank = np.full((n, 1), 1 / n)
-   # print(modified_page_rank)
+    # print(modified_page_rank)
     #      url1, url2, url3
     # url1  x      x    x
     # url2
@@ -93,11 +93,10 @@ def hits_rank():
     print("Authority Points" , authorities)
 
 def default_rank():
-    # incoming = generate_incoming_url_dict()
     outlinks_sum = generate_outlinks_sum_dict()
     outlinks = generate_outgoing_url_dict()
     n = len(outlinks)
-    print("Number of links with outlinks:", n)
+    print("Number of crawled links:", n)
     # floating point precision means that data will be lost.
 
     page_rank = np.full((n, 1), 1 / n)
@@ -127,9 +126,14 @@ def default_rank():
     index_sorted = sorted(
         range(len(page_rank)), key=lambda x: page_rank[x], reverse=True
     )
-    sorted_urls = [outlink_keys[x] for x in index_sorted]
-    print(sorted_urls[0:30])
-    print([page_rank[x][0] for x in index_sorted][0:30])
+    # sorted_urls = [outlink_keys[x] for x in index_sorted]
+
+    print("Top 100 most important pages:")
+    outStr = ""
+    for x in index_sorted:
+        outStr += f"({outlink_keys[x]}: {page_rank[x][0]}), "
+
+    print(outStr)
     print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
 
 
@@ -178,16 +182,22 @@ def default_rank_data_preprocessing():
     """
     outlinks_sum = generate_outlinks_sum_dict()
     temp = []
+    totTrimmed = 0
+    # For all lines in linksTo, put all links by line that have been crawled into temp.
     with open(f"linksTo.csv", "r") as file:
         reader = csv.reader(file)
         for line in reader:
             filtered_line = list(filter(lambda x: x in outlinks_sum, line))
+            totTrimmed += len(line)-len(filtered_line)
             temp.append(filtered_line)
 
+    print("# links trimmed:", totTrimmed)
+    # Overwrite linksTo to contain only crawled urls.
     with open(f"linksTo.csv", "w") as file:
         writer = csv.writer(file)
         writer.writerows(temp)
 
+    # Update linksOut with the new number of outlinks per url.
     with open(f"linksOut.csv", "w") as file:
         writer = csv.writer(file)
         for i in range(len(temp)):

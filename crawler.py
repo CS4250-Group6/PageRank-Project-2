@@ -37,7 +37,6 @@ def save_csv(url, links):
 
 
 def save_link_csv(url, links):
-
     with open(f"{fileSuffix}linksTo.csv", "a") as file:
         writer = csv.writer(file)
         r = (url, *links)
