@@ -13,7 +13,7 @@ def random_surfer_rank():
     outlinks_sum = generate_outlinks_sum_dict()
     outlinks = generate_outgoing_url_dict()
     n = len(outlinks)
-   # print("Number of links with outlinks:", n)
+    print("Number of links with outlinks:", n)
     # floating point precision means that data will be lost.
     page_rank = np.full((n, 1), 1 / n)
    # print(modified_page_rank)
@@ -39,8 +39,8 @@ def random_surfer_rank():
         page_rank = M @ page_rank
         #use iterative page rank to calculate the modified page rank for each iteration
         result_pt1 = np.dot((1-surfer_lambda), page_rank)
-        modified_page_rank = ((surfer_lambda/n) + result_pt1)
-        #print(modified_page_rank)
+        page_rank = ((surfer_lambda/n) + result_pt1) # modified page rank
+    
 
     outlink_keys = list(outlinks.keys())
     index_sorted = sorted(
@@ -48,9 +48,9 @@ def random_surfer_rank():
     )
     sorted_urls = [outlink_keys[x] for x in index_sorted]
    # print(sorted_urls[0:30])
-    #print([page_rank[x][0] for x in index_sorted][0:30])
-    #print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
-    print("Sum of modified page rank:", sum(modified_page_rank[i][0] for i in range(len(modified_page_rank))))
+    print([page_rank[x][0] for x in index_sorted][0:30])
+    print("Sum of modified page rank:", sum(page_rank[i][0] for i in range(len(page_rank))))
+    
 
 
     #random surfer model
