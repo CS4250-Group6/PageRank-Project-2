@@ -7,8 +7,9 @@ import csv
 
 
 def random_surfer_rank():
-    # use same code from default_rank to retrieve iterative page rank values to use
-    # for modified page rank
+    # use modified version of code from default_rank to retrieve iterative page rank values to use for modified page rank
+    surfer_lambda = 0.2
+
     outlinks_sum = generate_outlinks_sum_dict()
     outlinks = generate_outgoing_url_dict()
     n = len(outlinks)
@@ -36,6 +37,10 @@ def random_surfer_rank():
     loops = 100
     for i in range(loops):
         page_rank = M @ page_rank
+        #use iterative page rank to calculate the modified page rank for each iteration
+        result_pt1 = np.dot((1-surfer_lambda), page_rank)
+        modified_page_rank = ((surfer_lambda/n) + result_pt1)
+        #print(modified_page_rank)
 
     outlink_keys = list(outlinks.keys())
     index_sorted = sorted(
@@ -45,26 +50,25 @@ def random_surfer_rank():
    # print(sorted_urls[0:30])
     #print([page_rank[x][0] for x in index_sorted][0:30])
     #print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
+    print("Sum of modified page rank:", sum(modified_page_rank[i][0] for i in range(len(modified_page_rank))))
+
 
     #random surfer model
-    surfer_lambda = 0.2
-    r = randint(0,1)
-    if r < surfer_lambda:
-        print("Go to random page")
-        random_page = random.choice(sorted_urls)
-        print(random_page)
-    if r >= surfer_lambda:
-        print("Click link at random page")
+   # r = randint(0,1)
+   # if r < surfer_lambda:
+      #  print("Go to random page")
+        #random_page = random.choice(sorted_urls)
+      #  print(random_page)
+  #  if r >= surfer_lambda:
+      #  print("Click link at random page")
 
 
-  #use iterative page rank to calculate the modified page rank
-    result_pt1 = np.dot((1-surfer_lambda), page_rank)
-    modified_page_rank = ((surfer_lambda/n) + result_pt1)
-    sum1 = 0
-    for i in modified_page_rank:
-        for j in i:
-            sum1 += j
-    print("Sum for random surfer model:", sum1)
+
+    #sum1 = 0
+    #for i in modified_page_rank:
+       # for j in i:
+        #    sum1 += j
+   # print("Sum for random surfer model:", sum1)
 
 
 
