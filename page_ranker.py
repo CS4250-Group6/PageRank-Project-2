@@ -1,4 +1,3 @@
-import random
 from random import randint
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -51,26 +50,6 @@ def random_surfer_rank():
     print([page_rank[x][0] for x in index_sorted][0:30])
     print("Sum of modified page rank:", sum(page_rank[i][0] for i in range(len(page_rank))))
     
-
-
-    #random surfer model
-   # r = randint(0,1)
-   # if r < surfer_lambda:
-      #  print("Go to random page")
-        #random_page = random.choice(sorted_urls)
-      #  print(random_page)
-  #  if r >= surfer_lambda:
-      #  print("Click link at random page")
-
-
-
-    #sum1 = 0
-    #for i in modified_page_rank:
-       # for j in i:
-        #    sum1 += j
-   # print("Sum for random surfer model:", sum1)
-
-
 
 def hits_rank():
     Node_link = np.array(
@@ -220,3 +199,4 @@ if __name__ == "__main__":
     default_rank()
     hits_rank()
     random_surfer_rank()
+
