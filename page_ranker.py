@@ -132,7 +132,7 @@ def default_rank():
     index_sorted = sorted(
         range(len(page_rank)), key=lambda x: page_rank[x], reverse=True
     )
-    # sorted_urls = [outlink_keys[x] for x in index_sorted]
+    sorted_urls = [outlink_keys[x] for x in index_sorted]
 
     print("Top 100 most important pages using default:")
     outStr = ""
