@@ -1,3 +1,4 @@
+import random
 from random import randint
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -6,7 +7,65 @@ import csv
 
 
 def random_surfer_rank():
-    pass
+    # use same code from default_rank to retrieve iterative page rank values to use
+    # for modified page rank
+    outlinks_sum = generate_outlinks_sum_dict()
+    outlinks = generate_outgoing_url_dict()
+    n = len(outlinks)
+   # print("Number of links with outlinks:", n)
+    # floating point precision means that data will be lost.
+    page_rank = np.full((n, 1), 1 / n)
+   # print(modified_page_rank)
+    #      url1, url2, url3
+    # url1  x      x    x
+    # url2
+    # url3
+    # Each nested array represents a row
+    # So each row is the inlinks going to this row from this column.
+    # AKA, the outlinks going from each column to this row.
+    M = np.zeros((n, n))
+    ii = -1
+    for i in outlinks:  # column
+        ii += 1
+        jj = -1
+        for j in outlinks:  # row
+            jj += 1
+            if j in outlinks[i]:
+                M[jj][ii] = 1 / outlinks_sum[i]
+
+    loops = 100
+    for i in range(loops):
+        page_rank = M @ page_rank
+
+    outlink_keys = list(outlinks.keys())
+    index_sorted = sorted(
+        range(len(page_rank)), key=lambda x: page_rank[x], reverse=True
+    )
+    sorted_urls = [outlink_keys[x] for x in index_sorted]
+   # print(sorted_urls[0:30])
+    #print([page_rank[x][0] for x in index_sorted][0:30])
+    #print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
+
+    #random surfer model
+    surfer_lambda = 0.2
+    r = randint(0,1)
+    if r < surfer_lambda:
+        print("Go to random page")
+        random_page = random.choice(sorted_urls)
+        print(random_page)
+    if r >= surfer_lambda:
+        print("Click link at random page")
+
+
+  #use iterative page rank to calculate the modified page rank
+    result_pt1 = np.dot((1-surfer_lambda), page_rank)
+    modified_page_rank = ((surfer_lambda/n) + result_pt1)
+    sum1 = 0
+    for i in modified_page_rank:
+        for j in i:
+            sum1 += j
+    print("Sum for random surfer model:", sum1)
+
 
 
 def hits_rank():
@@ -155,4 +214,5 @@ def default_rank_data_preprocessing():
 if __name__ == "__main__":
     default_rank_data_preprocessing()
     default_rank()
-    # hits_rank()
+    hits_rank()
+    random_surfer_rank()
