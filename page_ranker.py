@@ -12,9 +12,10 @@ def random_surfer_rank():
     outlinks_sum = generate_outlinks_sum_dict()
     outlinks = generate_outgoing_url_dict()
     n = len(outlinks)
-    print("Number of links with outlinks:", n)
+    print("Number of crawled links:", n)
     # floating point precision means that data will be lost.
     page_rank = np.full((n, 1), 1 / n)
+
     # print(modified_page_rank)
     #      url1, url2, url3
     # url1  x      x    x
@@ -39,17 +40,22 @@ def random_surfer_rank():
         #use iterative page rank to calculate the modified page rank for each iteration
         result_pt1 = np.dot((1-surfer_lambda), page_rank)
         page_rank = ((surfer_lambda/n) + result_pt1) # modified page rank
-    
+
 
     outlink_keys = list(outlinks.keys())
     index_sorted = sorted(
         range(len(page_rank)), key=lambda x: page_rank[x], reverse=True
     )
     sorted_urls = [outlink_keys[x] for x in index_sorted]
-   # print(sorted_urls[0:30])
-    print([page_rank[x][0] for x in index_sorted][0:30])
-    print("Sum of modified page rank:", sum(page_rank[i][0] for i in range(len(page_rank))))
-    
+
+    print("Top 100 most important pages using random surfer:")
+    outStr = ""
+    for x in index_sorted:
+        outStr += f"({outlink_keys[x]}: {page_rank[x][0]}), "
+
+    print(outStr)
+    print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
+
 
 def hits_rank():
     Node_link = np.array(
@@ -128,7 +134,7 @@ def default_rank():
     )
     # sorted_urls = [outlink_keys[x] for x in index_sorted]
 
-    print("Top 100 most important pages:")
+    print("Top 100 most important pages using default:")
     outStr = ""
     for x in index_sorted:
         outStr += f"({outlink_keys[x]}: {page_rank[x][0]}), "
@@ -203,7 +209,7 @@ def default_rank_data_preprocessing():
 
 if __name__ == "__main__":
     default_rank_data_preprocessing()
-    default_rank()
-    hits_rank()
+    # default_rank()
+    # hits_rank()
     random_surfer_rank()
 
