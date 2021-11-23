@@ -97,23 +97,26 @@ def get_links(soup, baseUrl):
     links = set()
 
     for link in soup.findAll("a", href=True, download=None):
-        newUrl = link.get("href")
-        if newUrl is not None:
-            if newUrl[-4:] != '.png' and newUrl[-4:] != '.jpg' and newUrl[-5:] != '.jpeg' and newUrl not in hand_picked_problems:
-                if newUrl[0:7] == "http://" or newUrl[0:8] == "https://" or newUrl.startswith("//"):
-                    no_protocol_url = replace_http_protocol(newUrl)
-                    if parser.can_fetch("*", "http://" + newUrl) and verify_not_restricted(no_protocol_url):
-                        links.add(no_protocol_url)
-                elif (
-                not newUrl.startswith("#")
-                and not newUrl.startswith("ftp://")
-                and not newUrl.startswith("mailto:")
-                and not newUrl == ""
-                ):
-                    if newUrl.find(baseUrl) == -1 and verify_not_restricted(baseUrl + newUrl) and parser.can_fetch("*", "http://" + baseUrl + newUrl):
-                        links.add(baseUrl + newUrl)
-                    elif parser.can_fetch("*", "http://" + newUrl) and verify_not_restricted(newUrl):
-                        links.add(newUrl)
+        try:
+            newUrl = link.get("href")
+            if newUrl is not None:
+                if newUrl[-4:] != '.png' and newUrl[-4:] != '.jpg' and newUrl[-5:] != '.jpeg' and newUrl not in hand_picked_problems:
+                    if newUrl[0:7] == "http://" or newUrl[0:8] == "https://" or newUrl.startswith("//"):
+                        no_protocol_url = replace_http_protocol(newUrl)
+                        if parser.can_fetch("*", "http://" + newUrl) and verify_not_restricted(no_protocol_url):
+                            links.add(no_protocol_url)
+                    elif (
+                    not newUrl.startswith("#")
+                    and not newUrl.startswith("ftp://")
+                    and not newUrl.startswith("mailto:")
+                    and not newUrl == ""
+                    ):
+                        if newUrl.find(baseUrl) == -1 and verify_not_restricted(baseUrl + newUrl) and parser.can_fetch("*", "http://" + baseUrl + newUrl):
+                            links.add(baseUrl + newUrl)
+                        elif parser.can_fetch("*", "http://" + newUrl) and verify_not_restricted(newUrl):
+                            links.add(newUrl)
+        except Exception:
+            print("bad")
     return links
 
 
@@ -159,7 +162,7 @@ while len(crawl) != 0 and len(visited) < searchCount:
             save_link_csv(url, links)
 
             crawl += list(links)
-            time.sleep(0.5)
+            time.sleep(0.1)
 
             visited.add(url)
 objects = ('Us', 'Google')

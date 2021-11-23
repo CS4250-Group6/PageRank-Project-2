@@ -50,7 +50,7 @@ def random_surfer_rank():
 
     print("Top 100 most important pages using random surfer:")
     outStr = ""
-    for x in index_sorted:
+    for x in index_sorted[0:100]:
         outStr += f"({outlink_keys[x]}: {page_rank[x][0]}), "
 
     print(outStr)
@@ -136,7 +136,7 @@ def default_rank():
 
     print("Top 100 most important pages using default:")
     outStr = ""
-    for x in index_sorted:
+    for x in index_sorted[0:100]:
         outStr += f"({outlink_keys[x]}: {page_rank[x][0]}), "
 
     print(outStr)
@@ -224,4 +224,3 @@ if __name__ == "__main__":
     # default_rank()
     # hits_rank()
     random_surfer_rank()
-
