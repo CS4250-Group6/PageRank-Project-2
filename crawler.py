@@ -14,7 +14,7 @@ def get_page(url):
     """fun(url: String) get_page -> String: get page"""
     try:
         site = requests.get("http://" + url)
-    except:
+    except Exception:
         print("BAD HTTP URL REQUEST:", url)
         return None
 
@@ -64,12 +64,14 @@ def get_base_url(url):
     if url_end != -1:
         base_url = base_url[:url_end]
     return base_url
+
 def get_url_subdirectory(url):
     subdi_url = replace_http_protocol(url)
     url_end = subdi_url.find("/")
     if url_end != -1:
         subdi_url = subdi_url[url_end:]
     return subdi_url
+
 def verify_not_restricted(url_to_check: str) -> bool:
     check = tldextract.extract(url_to_check)
     against = tldextract.extract(restrict_domain)
@@ -119,59 +121,59 @@ def get_links(soup, baseUrl):
             print("bad")
     return links
 
+if __name__ == "__main__":
+    visited = set()
+    hand_picked_problems = set(["en.wikipedia.orgjavascript:print();"])
+    p = argparse.ArgumentParser(description="Crawl page")
+    p.add_argument("-n", default=1000)
+    p.add_argument("seed_url", default="www.cpp.edu", nargs="?")
+    p.add_argument("-r", default="www.cpp.edu")
+    p.add_argument("-o", default="")
+    args = p.parse_args(sys.argv[1:])
 
-visited = set()
-hand_picked_problems = set(["en.wikipedia.orgjavascript:print();"])
-p = argparse.ArgumentParser(description="Crawl page")
-p.add_argument("-n", default=1000)
-p.add_argument("seed_url", default="www.cpp.edu", nargs="?")
-p.add_argument("-r", default="www.cpp.edu")
-p.add_argument("-o", default="")
-args = p.parse_args(sys.argv[1:])
+    crawl = [args.seed_url]
+    restrict_domain = args.r
+    searchCount = int(args.n)
+    fileSuffix = args.o
 
-crawl = [args.seed_url]
-restrict_domain = args.r
-searchCount = int(args.n)
-fileSuffix = args.o
+    print(f"Running crawler with: n={args.n}, seed={args.seed_url}, restrict={args.r}, file_suffix={args.o}.")
 
-print(f"Running crawler with: n={args.n}, seed={args.seed_url}, restrict={args.r}, file_suffix={args.o}.")
+    parser = robotparser.RobotFileParser()
+    parser.set_url(f"http://{restrict_domain}/robots.txt") # change for cpp crawling, needs to be this url for wikipedia
+    parser.read()
 
-parser = robotparser.RobotFileParser()
-parser.set_url(f"http://{restrict_domain}/robots.txt") # change for cpp crawling, needs to be this url for wikipedia
-parser.read()
+    if parser.disallow_all: # type: ignore # pyright stuff, please ignore.
+        print("ERR! NOT ALLOWED TO PARSE ANY!")
+        exit(1)
 
-if parser.disallow_all: # type: ignore # pyright stuff, please ignore.
-    print("ERR! NOT ALLOWED TO PARSE ANY!")
-    exit(1)
+    while len(crawl) != 0 and len(visited) < searchCount:
 
-while len(crawl) != 0 and len(visited) < searchCount:
+        url = crawl.pop(0)
+        baseUrl = get_base_url(url)
 
-    url = crawl.pop(0)
-    baseUrl = get_base_url(url)
+        if url not in visited and parser.can_fetch("*", "http://" + url):
+            print(f"Crawling ({len(visited)}/{searchCount}): {url}")
 
-    if url not in visited and parser.can_fetch("*", "http://" + url):
-        print(f"Crawling ({len(visited)}/{searchCount}): {url}")
+            page = get_page(url)
+            if page is not None:
 
-        page = get_page(url)
-        if page is not None:
+                soup = BeautifulSoup(page, "html.parser")
+                links = get_links(soup, baseUrl)
 
-            soup = BeautifulSoup(page, "html.parser")
-            links = get_links(soup, baseUrl)
+                save_csv(url, len(links))
+                save_link_csv(url, links)
 
-            save_csv(url, len(links))
-            save_link_csv(url, links)
+                crawl += list(links)
+                time.sleep(0.1)
 
-            crawl += list(links)
-            time.sleep(0.1)
+                visited.add(url)
+    objects = ('Us', 'Google')
+    y_pos = np.arange(len(objects))
+    performance = [time_took, 2.3 ]
 
-            visited.add(url)
-objects = ('Us', 'Google')
-y_pos = np.arange(len(objects))
-performance = [time_took, 2.3 ]
+    plt.bar(y_pos, performance, align='center', alpha=0.5)
+    plt.xticks(y_pos, objects)
+    plt.ylabel('time in minutes')
+    plt.title('Time to Crawl 1000 Pages')
 
-plt.bar(y_pos, performance, align='center', alpha=0.5)
-plt.xticks(y_pos, objects)
-plt.ylabel('time in minutes')
-plt.title('Time to Crawl 1000 Pages')
-
-plt.show()
+    plt.show()

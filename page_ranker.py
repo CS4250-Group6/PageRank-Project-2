@@ -141,14 +141,13 @@ def default_rank():
 
     print(outStr)
     print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
-        sorted_urls = [outlink_keys[x] for x in index_sorted]
+    sorted_urls = [outlink_keys[x] for x in index_sorted]
     range_urls = sorted_urls[0:30]
     y = [page_rank[x][0] for x in index_sorted][0:30]
     subdi_urls = []
     for each in range_urls:
         subdi = get_url_subdirectory(each)
         subdi_urls.append(subdi)
-        
 
     plt.scatter(subdi_urls, y)
     plt.plot(subdi_urls, y)
