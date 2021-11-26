@@ -34,12 +34,21 @@ def random_surfer_rank():
             if j in outlinks[i]:
                 M[jj][ii] = 1 / outlinks_sum[i]
 
-    loops = 100
-    for i in range(loops):
-        page_rank = M @ page_rank
+    loops = 0
+    diff = 1
+    while diff > 0.0001:
+        loops += 1
+        page_rank_new = M @ page_rank
         #use iterative page rank to calculate the modified page rank for each iteration
-        result_pt1 = np.dot((1-surfer_lambda), page_rank)
-        page_rank = ((surfer_lambda/n) + result_pt1) # modified page rank
+        result_pt1 = np.dot((1-surfer_lambda), page_rank_new)
+        page_rank_new = ((surfer_lambda/n) + result_pt1) # modified page rank
+
+        diff = np.sum(abs(page_rank_new-page_rank))
+        print("diff", diff)
+
+        page_rank = page_rank_new
+
+    print(f"Loops until diff {diff}: {loops}")
 
 
     outlink_keys = list(outlinks.keys())
@@ -51,7 +60,7 @@ def random_surfer_rank():
     print("Top 100 most important pages using random surfer:")
     outStr = ""
     for x in index_sorted[0:100]:
-        outStr += f"({outlink_keys[x]}: {page_rank[x][0]}), "
+        outStr += f"({outlink_keys[x]}: {page_rank[x][0]}),\n"
 
     print(outStr)
     print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
@@ -124,9 +133,18 @@ def default_rank():
             if j in outlinks[i]:
                 M[jj][ii] = 1 / outlinks_sum[i]
 
-    loops = 100
-    for i in range(loops):
-        page_rank = M @ page_rank
+    diff = 1
+    loops = 0
+    while diff > 0.0001:
+        loops += 1
+        page_rank_new = M @ page_rank
+
+        diff = np.sum(abs(page_rank_new-page_rank))
+        print("diff", diff)
+
+        page_rank = page_rank_new
+
+    print(f"Loops until diff {diff}: {loops}")
 
     outlink_keys = list(outlinks.keys())
     index_sorted = sorted(
@@ -137,7 +155,7 @@ def default_rank():
     print("Top 100 most important pages using default:")
     outStr = ""
     for x in index_sorted[0:100]:
-        outStr += f"({outlink_keys[x]}: {page_rank[x][0]}), "
+        outStr += f"({outlink_keys[x]}: {page_rank[x][0]}),\n"
 
     print(outStr)
     print("Total:", sum(page_rank[i][0] for i in range(len(page_rank))))
@@ -220,6 +238,6 @@ def default_rank_data_preprocessing():
 
 if __name__ == "__main__":
     default_rank_data_preprocessing()
-    # default_rank()
+    default_rank()
     # hits_rank()
-    random_surfer_rank()
+    # random_surfer_rank()

@@ -15,7 +15,7 @@ def get_page(url):
     try:
         site = requests.get("http://" + url)
     except Exception:
-        print("BAD HTTP URL REQUEST:", url)
+        print(f"BAD HTTP URL REQUEST: {url}")
         return None
 
     if site.status_code == 429:

@@ -1,5 +1,6 @@
 # Project specific
 *.csv
+*.txt
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,python,emacs,visualstudiocode,sublimetext
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,python,emacs,visualstudiocode,sublimetext
