@@ -239,5 +239,5 @@ def default_rank_data_preprocessing():
 if __name__ == "__main__":
     default_rank_data_preprocessing()
     default_rank()
-    # hits_rank()
-    # random_surfer_rank()
+    hits_rank()
+    random_surfer_rank()
